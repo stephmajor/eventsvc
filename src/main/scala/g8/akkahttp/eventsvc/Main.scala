@@ -6,7 +6,10 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
 
-import scala.concurrent.ExecutionContext
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import g8.akkahttp.eventsvc.data._
+
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
 trait BaseComponent extends Config {
   protected implicit def log: LoggingAdapter
@@ -15,8 +18,7 @@ trait BaseComponent extends Config {
 
 object Main extends App with Config with Services {
   override protected def log = Logging(system, "service")
-
-  override protected def executor = system.dispatcher
+  override protected def executor: ExecutionContextExecutor = system.dispatcher
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -29,6 +31,7 @@ object Main extends App with Config with Services {
 
 trait Services extends BaseComponent {
   import Directives._
+  import io.circe.generic.auto._
 
   protected val _statusService: StatusService
   protected val _eventService: EventService
@@ -46,6 +49,15 @@ trait Services extends BaseComponent {
         } ~
         path("read" / Segment) { eventId =>
           _eventService.readEvent(eventId)
+        }
+      } ~
+      post {
+        path("create") {
+          decodeRequest {
+            entity(as[EventCreationRequest]) { ecr =>
+              _eventService.createEvents(ecr)
+            }
+          }
         }
       }
     }

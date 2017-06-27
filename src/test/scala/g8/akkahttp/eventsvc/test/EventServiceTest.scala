@@ -10,8 +10,8 @@ class EventServiceTest extends ServiceTestBase with Services {
   import io.circe.generic.auto._
 
   private val _testSystem = ActorSystem()
-  val _eventService = new EventService(_testSystem)
-  val _statusService = mock[StatusService]
+  val _eventService: EventService = new EventService(_testSystem)
+  val _statusService: StatusService = mock[StatusService]
 
   "EventService - root" when {
     "GET /v1/event" should {
