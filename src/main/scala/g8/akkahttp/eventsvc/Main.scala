@@ -5,7 +5,6 @@ import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
-import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport
 
 import scala.concurrent.ExecutionContext
 
@@ -14,31 +13,41 @@ trait BaseComponent extends Config {
   protected implicit def executor: ExecutionContext
 }
 
-trait BaseService extends BaseComponent with ErrorAccumulatingCirceSupport {
-  protected def routes: Route
-}
-
 object Main extends App with Config with Services {
-  implicit val system       = ActorSystem()
+  override protected def log = Logging(system, "service")
+
+  override protected def executor = system.dispatcher
+
+  implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
-  override protected def log      = Logging(system, "service")
-  override protected def executor = system.dispatcher
+  override val _statusService = new StatusService(system)
+  override val _eventService  = new EventService(system)
 
   Http().bindAndHandle(routes, httpConfig.interface, httpConfig.port)
 }
 
-trait Services extends StatusService {
+trait Services extends BaseComponent {
   import Directives._
 
-  private val apiVersion = "v1"
-  private val allRoutes = Map(
-    "status" -> super[StatusService].routes
-  )
+  protected val _statusService: StatusService
+  protected val _eventService: EventService
 
-  protected override val routes: Route = pathPrefix(apiVersion) {
-    allRoutes.map {
-      case (k, v) => path(k)(v)
-    } reduce (_ ~ _)
+  private val apiVersion = "v1"
+
+  val routes: Route = pathPrefix(apiVersion) {
+    (path("status") & get) {
+      _statusService.getStatus
+    } ~
+    pathPrefix("event") {
+      get {
+        pathEndOrSingleSlash {
+          _eventService.getStatus
+        } ~
+        path("read" / Segment) { eventId =>
+          _eventService.readEvent(eventId)
+        }
+      }
+    }
   }
 }

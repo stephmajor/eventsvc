@@ -13,6 +13,7 @@ libraryDependencies ++= {
   val ficusV         = "1.4.0"
   val scalaMockV     = "3.5.0"
   val catsScalatestV = "2.2.0"
+  val mongoDriverV   = "2.1.0"
 
   Seq(
     "org.typelevel"     %% "cats-core"       % catsV,
@@ -22,6 +23,7 @@ libraryDependencies ++= {
     "io.circe"          %% "circe-core"      % circeV,
     "io.circe"          %% "circe-generic"   % circeV,
     "io.circe"          %% "circe-parser"    % circeV,
+    "org.mongodb.scala" %% "mongo-scala-driver" % mongoDriverV,
     "org.scalamock"     %% "scalamock-scalatest-support" % scalaMockV     % "it,test",
     "com.ironcorelabs"  %% "cats-scalatest"              % catsScalatestV % "it,test",
     "com.typesafe.akka" %% "akka-http-testkit"           % akkaHttpV      % "it,test"

@@ -1,4 +1,4 @@
-package g8.akkahttp.eventsvc
+package g8.akkahttp.eventsvc.test
 
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
