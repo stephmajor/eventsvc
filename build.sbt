@@ -24,6 +24,7 @@ libraryDependencies ++= {
     "io.circe"          %% "circe-generic"   % circeV,
     "io.circe"          %% "circe-parser"    % circeV,
     "org.mongodb.scala" %% "mongo-scala-driver" % mongoDriverV,
+    "io.netty"          %  "netty-all"          % "4.1.12.Final",
     "org.scalamock"     %% "scalamock-scalatest-support" % scalaMockV     % "it,test",
     "com.ironcorelabs"  %% "cats-scalatest"              % catsScalatestV % "it,test",
     "com.typesafe.akka" %% "akka-http-testkit"           % akkaHttpV      % "it,test"
