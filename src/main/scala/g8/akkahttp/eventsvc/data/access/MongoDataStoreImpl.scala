@@ -1,11 +1,10 @@
 package g8.akkahttp.eventsvc.data.access
 
-import com.mongodb.ConnectionString
-import com.mongodb.connection.netty.NettyStreamFactoryFactory
 import g8.akkahttp.eventsvc.Config
 import g8.akkahttp.eventsvc.data.Event
-import org.mongodb.scala.connection.{ClusterSettings, SslSettings}
-import org.mongodb.scala.{Completed, MongoClient, MongoClientSettings, MongoCollection, Observer, ServerAddress}
+import org.mongodb.scala.bson.BsonDocument
+import org.mongodb.scala.model.Filters
+import org.mongodb.scala.{Completed, MongoClient, MongoCollection, Observer}
 
 import scala.concurrent.{Future, Promise}
 
@@ -33,26 +32,28 @@ trait MongoDataStoreImpl extends DataStoreComponent  {
 
       p.future
     }
+
+    override def getEventsByType(triggerType: Int): Future[List[BsonDocument]] = {
+      val p = Promise[List[BsonDocument]]
+      val database = MongoDataStoreConnection.client.getDatabase("sdsi")
+      val collection: MongoCollection[BsonDocument] = database.getCollection("events")
+
+      collection.find(Filters.`eq`("trigger.triggerType", triggerType)).collect().subscribe(
+        (results: Seq[BsonDocument]) => p.success(results.toList),
+        (error: Throwable) => p.failure(error)
+      )
+
+      p.future
+    }
   }
 }
 
 object MongoDataStoreConnection extends Config {
 
-//  import collection.JavaConverters._
-
   private val uri: String = config.getString("mongoConnectionUri")
-
-//  private val cStr = new ConnectionString(uri)
-//  private val atlasConfig = MongoClientSettings.builder()
-//    .clusterSettings(ClusterSettings.builder().hosts(cStr.getHosts.asScala.map(new ServerAddress(_)).asJava).build())
-//    .credentialList(cStr.getCredentialList)
-//    .sslSettings(SslSettings.builder().enabled(true).build())
-//    .streamFactoryFactory(NettyStreamFactoryFactory.builder().build())
-//    .build()
-
   System.setProperty("org.mongodb.async.type", "netty")
 
-  // Introduce the standard UUID codec for compatibility with other drivers
+  // TODO: Introduce the standard UUID codec for compatibility with other drivers
 
   lazy val client: MongoClient = MongoClient(uri)
 }

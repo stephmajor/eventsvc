@@ -1,5 +1,7 @@
 package g8.akkahttp.eventsvc.data.access
 
+import org.mongodb.scala.bson.BsonDocument
+
 import scala.concurrent.Future
 
 trait DataStoreComponent {
@@ -10,5 +12,6 @@ trait DataStoreComponent {
 
     // EVENTS
     def createEvents(numToCreate: Int): Future[Boolean]
+    def getEventsByType(triggerType: Int): Future[List[BsonDocument]]
   }
 }

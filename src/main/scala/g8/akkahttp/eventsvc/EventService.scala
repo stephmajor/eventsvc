@@ -35,4 +35,15 @@ trait EventServiceTrait extends BaseComponent with DataStoreComponent with Respo
     log.info("/event/create executing")
     sendResponse(dataStore.createEvents(ecr.howMany))
   }
+
+  def getEventsByType(triggerType: Int): Route = {
+    log.info("/event/getEventsByType executing")
+    sendResponse(
+      for {
+        events <- dataStore.getEventsByType(triggerType)
+      } yield {
+        events.map(_.toJson).mkString("[", ",", "]")
+      }
+    )
+  }
 }

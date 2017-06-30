@@ -49,6 +49,9 @@ trait Services extends BaseComponent {
         } ~
         path("read" / Segment) { eventId =>
           _eventService.readEvent(eventId)
+        } ~
+        path("triggerType" / IntNumber) { triggerType =>
+          _eventService.getEventsByType(triggerType)
         }
       } ~
       post {
